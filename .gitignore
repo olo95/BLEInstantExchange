@@ -10,5 +10,6 @@
 Pods/
 *.xcuserstate
 *.xcworkspacedata
+xcschemes/
 IDEWorkspaceChecks.plist
 # End of https://www.gitignore.io/api/cocoapods

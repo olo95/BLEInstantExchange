@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  BLEInstantExchange
-//
-//  Created by aleksanders on 23/05/2018.
-//  Copyright © 2018 SaszaCorp. All rights reserved.
-//
 
 import UIKit
 
@@ -13,9 +6,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = BLEViewController()
+        window?.makeKeyAndVisible()
         return true
     }
 
