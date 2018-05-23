@@ -25,12 +25,21 @@ class BLEViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
         // Do any additional setup after loading the view, typically from a nib.
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    private func setupUI() {
+        mainView.exchangeMessageButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onExchangeButtonTapped)))
+    }
+    
+    @objc private func onExchangeButtonTapped() {
+        guard !(mainView.exchangeMessageTextField.text!.isEmpty) else {
+            return
+        }
+        
+        peripheral.exchange(message: mainView.exchangeMessageTextField.text!)
+        central.scanForExchange()
     }
 }
 
@@ -40,7 +49,7 @@ extension BLEViewController: BLEViewModelDelegate {
 
 extension BLEViewController: BLECentralDelegate {
     func onReceived(message: String) {
-        
+        mainView.exchangeMessageResponseLabel.text = message
     }
 }
 

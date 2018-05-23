@@ -15,7 +15,7 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     private let peripheralDelegate: BLEPeripheralDelegate
     private lazy var service = CBMutableService(type: serviceUUID, primary: true)
-    private lazy var peripheralManager: CBPeripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+    private var peripheralManager: CBPeripheralManager?
     
     private var exchangeMessage: String?
     
@@ -32,23 +32,25 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     func exchange(message: String) {
         exchangeMessage = message
-        peripheralManager.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey])
+        peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
     
     func stop() {
-        peripheralManager.stopAdvertising()
+        peripheralManager?.stopAdvertising()
     }
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        
+        if peripheral.state == .poweredOn {
+            peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey])
+        }
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         guard let message = exchangeMessage, request.characteristic.uuid == characteristicUUID else {
-            peripheralManager.respond(to: request, withResult: .unlikelyError)
+            peripheralManager?.respond(to: request, withResult: .unlikelyError)
             return
         }
         request.value = message.data(using: .utf8)
-        peripheralManager.respond(to: request, withResult: .success)
+        peripheralManager?.respond(to: request, withResult: .success)
     }
 }

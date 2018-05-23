@@ -19,12 +19,13 @@ class BLEView: UIView {
     lazy var exchangeMessageButton: UIButton = {
         let button = UIButton()
         button.setTitle("Send message", for: .normal)
-        button.tintColor = .blue
+        button.setTitleColor(.blue, for: .normal)
         return button
     }()
     
     lazy var exchangeMessageResponseTitleLabel: UILabel = {
         let label = UILabel()
+        label.textAlignment = .center
         label.text = "Response"
         return label
     }()

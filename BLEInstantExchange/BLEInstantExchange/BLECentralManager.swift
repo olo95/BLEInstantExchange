@@ -12,22 +12,24 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     private let characteristicUUID = CBUUID(string: "f945af3b-95a5-4d55-a80a-2a1c1e7564a8")
     private let centralDelegate: BLECentralDelegate
     
-    private lazy var centralManager = CBCentralManager(delegate: self, queue: nil)
+    private var centralManager: CBCentralManager?
     
     init(centralDelegate: BLECentralDelegate) {
         self.centralDelegate = centralDelegate
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        
+        if central.state == .poweredOn {
+            centralManager?.scanForPeripherals(withServices: [serviceUUID], options: nil)
+        }
     }
     
     func scanForExchange() {
-        centralManager.scanForPeripherals(withServices: [serviceUUID], options: nil)
+        centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
     func stop() {
-        centralManager.stopScan()
+        centralManager?.stopScan()
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
