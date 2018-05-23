@@ -15,6 +15,14 @@ class BLEViewController: UIViewController {
         return BLEPeripheralManager(peripheralDelegate: self)
     }()
     
+    private var mainView: BLEView {
+        return view as! BLEView
+    }
+    
+    override func loadView() {
+        view = BLEView()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
