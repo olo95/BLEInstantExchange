@@ -31,7 +31,9 @@ extension BLEViewController: BLEViewModelDelegate {
 }
 
 extension BLEViewController: BLECentralDelegate {
-    
+    func onReceived(message: String) {
+        
+    }
 }
 
 extension BLEViewController: BLEPeripheralDelegate {
