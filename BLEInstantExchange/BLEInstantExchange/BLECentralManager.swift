@@ -32,8 +32,8 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         centralManager?.stopScan()
     }
     
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        guard error == nil, let services = peripheral.services, services.contains(where: { $0.uuid == serviceUUID }) else {
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        guard let services = peripheral.services, services.contains(where: { $0.uuid == serviceUUID }) else {
             return
         }
         central.connect(peripheral, options: nil)
@@ -64,5 +64,6 @@ extension BLECentralManager: CBPeripheralDelegate {
             return
         }
         centralDelegate.onReceived(message: message)
+        stop()
     }
 }

@@ -52,5 +52,6 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
         }
         request.value = message.data(using: .utf8)
         peripheralManager?.respond(to: request, withResult: .success)
+        stop()
     }
 }
