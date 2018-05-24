@@ -31,6 +31,7 @@ class BLEViewController: UIViewController {
     
     private func setupUI() {
         mainView.exchangeMessageButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onExchangeButtonTapped)))
+        mainView.resetButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(onResetButtonTapped)))
     }
     
     @objc private func onExchangeButtonTapped() {
@@ -41,6 +42,11 @@ class BLEViewController: UIViewController {
         peripheral.stop()
         peripheral.exchange(message: mainView.exchangeMessageTextField.text!)
         central.scanForExchange()
+    }
+    
+    @objc private func onResetButtonTapped() {
+        central.stop()
+        peripheral.stop()
     }
 }
 

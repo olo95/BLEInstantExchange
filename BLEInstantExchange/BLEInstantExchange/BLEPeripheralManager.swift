@@ -44,7 +44,7 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     private func startAdvertising() {
         peripheralManager?.removeAllServices()
         peripheralManager?.add(service)
-        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey])
+        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey, CBAdvertisementDataServiceUUIDsKey: [serviceUUID]])
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {

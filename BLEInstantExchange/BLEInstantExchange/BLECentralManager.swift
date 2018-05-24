@@ -21,7 +21,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
-            centralManager?.scanForPeripherals(withServices: nil, options: nil)
+            centralManager?.scanForPeripherals(withServices: [serviceUUID], options: nil)
         }
     }
     
@@ -32,16 +32,13 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     func stop() {
         centralManager?.stopScan()
+        connectedPeripheral = nil
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        guard let peripheralName = advertisementData[CBAdvertisementDataLocalNameKey] as? String, peripheralName.elementsEqual(advertismentDataLocalNameKey) else { return }
-//        guard let services = peripheral.services else { return }
-//        services.forEach {
-//            print($0.uuid)
-//        }
-//        print("////////////////////////////////////////////////////////////////////////")
-//        guard services.contains(where: { $0.uuid == serviceUUID }) else { return }
+        guard let peripheralName = advertisementData[CBAdvertisementDataLocalNameKey] as? String, peripheralName.elementsEqual(advertismentDataLocalNameKey) else {
+            return
+        }
         if let connectedPeripheral = connectedPeripheral { centralManager?.cancelPeripheralConnection(connectedPeripheral) }
         connectedPeripheral = peripheral
         central.connect(connectedPeripheral!, options: nil)
@@ -50,7 +47,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         connectedPeripheral = peripheral
         connectedPeripheral?.delegate = self
-        connectedPeripheral?.discoverServices(nil)
+        connectedPeripheral?.discoverServices([serviceUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {

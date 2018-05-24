@@ -12,14 +12,13 @@ class BLEView: UIView {
     
     lazy var exchangeMessageTextField: UITextField = {
         let textField = UITextField()
-        textField.backgroundColor = .gray
+        textField.backgroundColor = .lightGray
         return textField
     }()
     
     lazy var exchangeMessageButton: UIButton = {
-        let button = UIButton()
+        let button = UIButton(type: .system)
         button.setTitle("Send message", for: .normal)
-        button.setTitleColor(.blue, for: .normal)
         return button
     }()
     
@@ -33,6 +32,12 @@ class BLEView: UIView {
     lazy var exchangeMessageResponseLabel: UILabel = {
         let label = UILabel()
         return label
+    }()
+    
+    lazy var resetButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Reset BLE", for: .normal)
+        return button
     }()
     
     init() {
@@ -63,6 +68,7 @@ class BLEView: UIView {
                         flex.addItem(exchangeMessageButton).height(44).grow(1)
                         flex.addItem(exchangeMessageTextField).height(44).grow(2)
                 }
+                flex.addItem(resetButton).marginTop(32).height(44)
         }
         addSubview(rootFlexContainer)
     }
