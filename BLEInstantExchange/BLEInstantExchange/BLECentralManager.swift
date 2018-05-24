@@ -42,6 +42,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
 //        }
 //        print("////////////////////////////////////////////////////////////////////////")
 //        guard services.contains(where: { $0.uuid == serviceUUID }) else { return }
+        if let connectedPeripheral = connectedPeripheral { centralManager?.cancelPeripheralConnection(connectedPeripheral) }
         connectedPeripheral = peripheral
         central.connect(connectedPeripheral!, options: nil)
     }
@@ -49,7 +50,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         connectedPeripheral = peripheral
         connectedPeripheral?.delegate = self
-        connectedPeripheral?.discoverServices([serviceUUID])
+        connectedPeripheral?.discoverServices(nil)
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -64,14 +65,27 @@ extension BLECentralManager: CBPeripheralDelegate {
         guard error == nil, let service = peripheral.services?.first(where: { $0.uuid == serviceUUID }) else {
             return
         }
-        peripheral.discoverCharacteristics([characteristicUUID], for: service)
+        connectedPeripheral = peripheral
+        connectedPeripheral?.discoverCharacteristics(nil, for: service)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard error == nil, let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }), let messageData = characteristic.value, let message = String(data: messageData, encoding: .utf8) else {
+        guard error == nil, let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else {
+            return
+        }
+        connectedPeripheral = peripheral
+        connectedPeripheral?.readValue(for: characteristic)
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard characteristic.uuid == self.characteristicUUID, let messageData = characteristic.value, let message = String(data: messageData, encoding: .utf8) else {
             return
         }
         centralDelegate.onReceived(message: message)
         stop()
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        
     }
 }

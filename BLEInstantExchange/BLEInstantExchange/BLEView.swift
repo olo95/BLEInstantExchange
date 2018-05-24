@@ -53,15 +53,15 @@ class BLEView: UIView {
                     .direction(.row)
                     .margin(8)
                     .define { flex in
-                        flex.addItem(exchangeMessageResponseTitleLabel).height(22).grow(1)
-                        flex.addItem(exchangeMessageResponseLabel).height(22).grow(2)
+                        flex.addItem(exchangeMessageResponseTitleLabel).height(44).grow(1)
+                        flex.addItem(exchangeMessageResponseLabel).height(44).grow(2)
                 }
                 flex.addItem()
                     .direction(.row)
                     .margin(8)
                     .define { flex in
-                        flex.addItem(exchangeMessageButton).height(22).grow(1)
-                        flex.addItem(exchangeMessageTextField).height(22).grow(2)
+                        flex.addItem(exchangeMessageButton).height(44).grow(1)
+                        flex.addItem(exchangeMessageTextField).height(44).grow(2)
                 }
         }
         addSubview(rootFlexContainer)

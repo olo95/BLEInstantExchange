@@ -23,19 +23,12 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     init(peripheralDelegate: BLEPeripheralDelegate) {
         self.peripheralDelegate = peripheralDelegate
         super.init()
-        
-        setPeripheralService()
-    }
-    
-    private func setPeripheralService() {
-        service.characteristics = [characteristic]
     }
     
     func exchange(message: String) {
+        service.characteristics = [characteristic]
         exchangeMessage = message
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
-        peripheralManager?.removeAllServices()
-        peripheralManager?.add(service)
     }
     
     func stop() {
@@ -44,8 +37,14 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         if peripheral.state == .poweredOn {
-            peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey])
+            startAdvertising()
         }
+    }
+    
+    private func startAdvertising() {
+        peripheralManager?.removeAllServices()
+        peripheralManager?.add(service)
+        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey])
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
