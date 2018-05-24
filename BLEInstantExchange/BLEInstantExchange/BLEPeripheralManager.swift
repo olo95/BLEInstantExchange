@@ -15,6 +15,7 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     private let peripheralDelegate: BLEPeripheralDelegate
     private lazy var service = CBMutableService(type: serviceUUID, primary: true)
+    private lazy var characteristic = CBMutableCharacteristic(type: characteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)
     private var peripheralManager: CBPeripheralManager?
     
     private var exchangeMessage: String?
@@ -27,12 +28,14 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     private func setPeripheralService() {
-        service.characteristics = [CBMutableCharacteristic(type: characteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)]
+        service.characteristics = [characteristic]
     }
     
     func exchange(message: String) {
         exchangeMessage = message
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+        peripheralManager?.removeAllServices()
+        peripheralManager?.add(service)
     }
     
     func stop() {

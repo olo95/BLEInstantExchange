@@ -13,6 +13,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     private let centralDelegate: BLECentralDelegate
     
     private var centralManager: CBCentralManager?
+    private var connectedPeripheral: CBPeripheral?
     
     init(centralDelegate: BLECentralDelegate) {
         self.centralDelegate = centralDelegate
@@ -20,11 +21,12 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
-            centralManager?.scanForPeripherals(withServices: [serviceUUID], options: nil)
+            centralManager?.scanForPeripherals(withServices: nil, options: nil)
         }
     }
     
     func scanForExchange() {
+        connectedPeripheral = nil
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
@@ -33,15 +35,21 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        guard let services = peripheral.services, services.contains(where: { $0.uuid == serviceUUID }) else {
-            return
-        }
-        central.connect(peripheral, options: nil)
+        guard let peripheralName = advertisementData[CBAdvertisementDataLocalNameKey] as? String, peripheralName.elementsEqual(advertismentDataLocalNameKey) else { return }
+//        guard let services = peripheral.services else { return }
+//        services.forEach {
+//            print($0.uuid)
+//        }
+//        print("////////////////////////////////////////////////////////////////////////")
+//        guard services.contains(where: { $0.uuid == serviceUUID }) else { return }
+        connectedPeripheral = peripheral
+        central.connect(connectedPeripheral!, options: nil)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        peripheral.delegate = self
-        peripheral.discoverServices([serviceUUID])
+        connectedPeripheral = peripheral
+        connectedPeripheral?.delegate = self
+        connectedPeripheral?.discoverServices([serviceUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {

@@ -37,7 +37,8 @@ class BLEViewController: UIViewController {
         guard !(mainView.exchangeMessageTextField.text!.isEmpty) else {
             return
         }
-        
+        central.stop()
+        peripheral.stop()
         peripheral.exchange(message: mainView.exchangeMessageTextField.text!)
         central.scanForExchange()
     }
