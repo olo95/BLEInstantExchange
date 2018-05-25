@@ -1,5 +1,6 @@
 
 import CoreBluetooth
+import RxSwift
 
 protocol BLEPeripheralDelegate {
     
@@ -8,17 +9,20 @@ protocol BLEPeripheralDelegate {
 class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     private let advertismentDataLocalNameKey = "BLEInstantMessage"
-    private let serviceUUID = CBUUID(string: "9ef8ef4d-f59c-455a-ade2-83271ced561e")
-    private let characteristicUUID = CBUUID(string: "f945af3b-95a5-4d55-a80a-2a1c1e7564a8")
     private let readProperties: CBCharacteristicProperties = [.read]
     private let readPermissions: CBAttributePermissions = [.readable]
     
     private let peripheralDelegate: BLEPeripheralDelegate
-    private lazy var service = CBMutableService(type: serviceUUID, primary: true)
-    private lazy var characteristic = CBMutableCharacteristic(type: characteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)
+    private lazy var dataService = CBMutableService(type: UUIDConstants.dataServiceUUID, primary: true)
+    private lazy var dataCharacteristic = CBMutableCharacteristic(type: UUIDConstants.dataCharacteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)
+    private lazy var secretPasswordService = CBMutableService(type: UUIDConstants.secretPasswordServiceUUID, primary: true)
+    private lazy var secretPasswordCharacteristic = CBMutableCharacteristic(type: UUIDConstants.secretPasswordCharacteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)
+    
     private var peripheralManager: CBPeripheralManager?
     
     private var exchangeMessage: String?
+    var isConnectedSafe: Bool = false
+    var secretPassword: String = ""
     
     init(peripheralDelegate: BLEPeripheralDelegate) {
         self.peripheralDelegate = peripheralDelegate
@@ -26,7 +30,8 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     func exchange(message: String) {
-        service.characteristics = [characteristic]
+        dataService.characteristics = [dataCharacteristic]
+        secretPasswordService.characteristics = [secretPasswordCharacteristic]
         exchangeMessage = message
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
@@ -38,22 +43,37 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
         if peripheral.state == .poweredOn {
             startAdvertising()
+        } else if peripheral.state == .poweredOff {
+            stop()
         }
     }
     
     private func startAdvertising() {
         peripheralManager?.removeAllServices()
-        peripheralManager?.add(service)
-        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey, CBAdvertisementDataServiceUUIDsKey: [serviceUUID]])
+        peripheralManager?.add(secretPasswordService)
+        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: advertismentDataLocalNameKey, CBAdvertisementDataServiceUUIDsKey: [UUIDConstants.secretPasswordServiceUUID]])
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        guard let message = exchangeMessage, request.characteristic.uuid == characteristicUUID else {
-            peripheralManager?.respond(to: request, withResult: .unlikelyError)
-            return
+        if isConnectedSafe {
+            guard let message = exchangeMessage, request.characteristic.uuid == UUIDConstants.dataCharacteristicUUID else {
+                peripheralManager?.respond(to: request, withResult: .unlikelyError)
+                return
+            }
+            request.value = message.data(using: .utf8)
+            peripheralManager?.respond(to: request, withResult: .success)
+        } else {
+            guard let message = exchangeMessage, request.characteristic.uuid == UUIDConstants.secretPasswordCharacteristicUUID else {
+                peripheralManager?.respond(to: request, withResult: .unlikelyError)
+                return
+            }
+            request.value = message.data(using: .utf8)
+            peripheralManager?.respond(to: request, withResult: .success)
         }
-        request.value = message.data(using: .utf8)
-        peripheralManager?.respond(to: request, withResult: .success)
-        stop()
+    }
+    
+    func onConnectionSafe() {
+        peripheralManager?.add(dataService)
+        isConnectedSafe = true
     }
 }

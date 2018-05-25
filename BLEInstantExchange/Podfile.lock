@@ -1,24 +1,33 @@
 PODS:
   - FlexLayout (1.3.8)
   - PinLayout (1.7.3)
+  - RxCocoa (4.1.2):
+    - RxSwift (~> 4.0)
+  - RxSwift (4.1.2)
   - SnapKit (4.0.0)
 
 DEPENDENCIES:
   - FlexLayout
   - PinLayout
+  - RxCocoa
+  - RxSwift
   - SnapKit
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - FlexLayout
     - PinLayout
+    - RxCocoa
+    - RxSwift
     - SnapKit
 
 SPEC CHECKSUMS:
   FlexLayout: e129ad320add3a672b1a3dabc1584ea7cd90ae42
   PinLayout: 0c2e68dba036a291ca9278aa8b799f58506f2a6d
+  RxCocoa: d88ba0f1f6abf040011a9eb4b539324fc426843a
+  RxSwift: e49536837d9901277638493ea537394d4b55f570
   SnapKit: a42d492c16e80209130a3379f73596c3454b7694
 
-PODFILE CHECKSUM: 89a6717c9872f8ec62a30fb210f7efa155c85760
+PODFILE CHECKSUM: 304bde257fe8c9007ef10a60c9e6556f79abc27a
 
 COCOAPODS: 1.5.0

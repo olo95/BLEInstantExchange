@@ -1,19 +1,22 @@
 
 import CoreBluetooth
+import RxSwift
 
 protocol BLECentralDelegate {
     func onReceived(message: String)
+    func peripheralIsValid()
 }
 
 class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     private let advertismentDataLocalNameKey = "BLEInstantMessage"
-    private let serviceUUID = CBUUID(string: "9ef8ef4d-f59c-455a-ade2-83271ced561e")
-    private let characteristicUUID = CBUUID(string: "f945af3b-95a5-4d55-a80a-2a1c1e7564a8")
     private let centralDelegate: BLECentralDelegate
     
     private var centralManager: CBCentralManager?
     private var connectedPeripheral: CBPeripheral?
+    
+    private var isPeripheralValid: Bool = false
+    var secretPassword: String = ""
     
     init(centralDelegate: BLECentralDelegate) {
         self.centralDelegate = centralDelegate
@@ -21,7 +24,9 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
-            centralManager?.scanForPeripherals(withServices: [serviceUUID], options: nil)
+            centralManager?.scanForPeripherals(withServices: [UUIDConstants.secretPasswordServiceUUID], options: nil)
+        } else if central.state == .poweredOff {
+            centralManager?.stopScan()
         }
     }
     
@@ -42,12 +47,12 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         if let connectedPeripheral = connectedPeripheral { centralManager?.cancelPeripheralConnection(connectedPeripheral) }
         connectedPeripheral = peripheral
         central.connect(connectedPeripheral!, options: nil)
+        central.stopScan()
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        connectedPeripheral = peripheral
         connectedPeripheral?.delegate = self
-        connectedPeripheral?.discoverServices([serviceUUID])
+        connectedPeripheral?.discoverServices([UUIDConstants.dataServiceUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -59,27 +64,38 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
 
 extension BLECentralManager: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        guard error == nil, let service = peripheral.services?.first(where: { $0.uuid == serviceUUID }) else {
-            return
+        if isPeripheralValid {
+            guard error == nil, let service = peripheral.services?.first(where: { $0.uuid == UUIDConstants.dataServiceUUID }) else {
+                return
+            }
+            connectedPeripheral?.discoverCharacteristics(nil, for: service)
+        } else {
+            guard error == nil, let service = peripheral.services?.first(where: { $0.uuid == UUIDConstants.secretPasswordServiceUUID }) else {
+                return
+            }
+            connectedPeripheral?.discoverCharacteristics(nil, for: service)
         }
-        connectedPeripheral = peripheral
-        connectedPeripheral?.discoverCharacteristics(nil, for: service)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard error == nil, let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else {
+        guard error == nil, let characteristic = service.characteristics?.first(where: { $0.uuid == UUIDConstants.dataCharacteristicUUID }) else {
             return
         }
-        connectedPeripheral = peripheral
         connectedPeripheral?.readValue(for: characteristic)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        guard characteristic.uuid == self.characteristicUUID, let messageData = characteristic.value, let message = String(data: messageData, encoding: .utf8) else {
-            return
+        if isPeripheralValid, characteristic.uuid == UUIDConstants.dataCharacteristicUUID, let messageData = characteristic.value, let message = String(data: messageData, encoding: .utf8) {
+            centralDelegate.onReceived(message: message)
+        } else {
+            guard characteristic.uuid == UUIDConstants.secretPasswordCharacteristicUUID, let messageData = characteristic.value, let message = String(data: messageData, encoding: .utf8) else {
+                return
+            }
+            if message == secretPassword {
+                centralDelegate.peripheralIsValid()
+                connectedPeripheral?.discoverServices([UUIDConstants.dataServiceUUID])
+            }
         }
-        centralDelegate.onReceived(message: message)
-        stop()
     }
     
     func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {

@@ -7,6 +7,8 @@ target 'BLEInstantExchange' do
   pod 'FlexLayout'
   pod 'PinLayout'
   pod 'SnapKit'
+  pod 'RxSwift'
+  pod 'RxCocoa'
   # Pods for BLEInstantExchange
 
 end

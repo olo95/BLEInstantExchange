@@ -4,6 +4,7 @@ import PinLayout
 
 class BLEView: UIView {
     
+    let contentView = UIScrollView()
     let rootFlexContainer: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -40,6 +41,12 @@ class BLEView: UIView {
         return button
     }()
     
+    lazy var secretPasswordTextField: UITextField = {
+        let textField = UITextField()
+        textField.backgroundColor = .lightGray
+        return textField
+    }()
+    
     init() {
         super.init(frame: .zero)
         setContainer()
@@ -69,8 +76,10 @@ class BLEView: UIView {
                         flex.addItem(exchangeMessageTextField).height(44).grow(2)
                 }
                 flex.addItem(resetButton).marginTop(32).height(44)
+                flex.addItem(secretPasswordTextField).marginTop(32).height(44)
         }
-        addSubview(rootFlexContainer)
+        contentView.addSubview(rootFlexContainer)
+        addSubview(contentView)
     }
     
     override func layoutSubviews() {
@@ -79,7 +88,9 @@ class BLEView: UIView {
     }
     
     private func layout() {
+        contentView.pin.all()
         rootFlexContainer.pin.all()
         rootFlexContainer.flex.layout()
+        contentView.contentSize = rootFlexContainer.frame.size
     }
 }

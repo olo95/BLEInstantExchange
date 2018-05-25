@@ -1,5 +1,6 @@
 
 import UIKit
+import RxSwift
 
 class BLEViewController: UIViewController {
 
@@ -35,12 +36,14 @@ class BLEViewController: UIViewController {
     }
     
     @objc private func onExchangeButtonTapped() {
-        guard !(mainView.exchangeMessageTextField.text!.isEmpty) else {
+        guard !(mainView.exchangeMessageTextField.text!.isEmpty) && !(mainView.secretPasswordTextField.text!.isEmpty) else {
             return
         }
+        central.secretPassword = mainView.secretPasswordTextField.text!
+        peripheral.secretPassword = mainView.secretPasswordTextField.text!
         central.stop()
         peripheral.stop()
-        peripheral.exchange(message: mainView.exchangeMessageTextField.text!)
+        peripheral.exchange(message: mainView.secretPasswordTextField.text!)
         central.scanForExchange()
     }
     
@@ -57,6 +60,10 @@ extension BLEViewController: BLEViewModelDelegate {
 extension BLEViewController: BLECentralDelegate {
     func onReceived(message: String) {
         mainView.exchangeMessageResponseLabel.text = message
+    }
+    
+    func peripheralIsValid() {
+        peripheral.onConnectionSafe()
     }
 }
 
