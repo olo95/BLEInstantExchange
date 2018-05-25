@@ -27,7 +27,6 @@ class BLEViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        // Do any additional setup after loading the view, typically from a nib.
     }
     
     private func setupUI() {
@@ -39,12 +38,10 @@ class BLEViewController: UIViewController {
         guard !(mainView.exchangeMessageTextField.text!.isEmpty) && !(mainView.secretPasswordTextField.text!.isEmpty) else {
             return
         }
-        central.secretPassword = mainView.secretPasswordTextField.text!
-        peripheral.secretPassword = mainView.secretPasswordTextField.text!
         central.stop()
         peripheral.stop()
-        peripheral.exchange(message: mainView.secretPasswordTextField.text!)
-        central.scanForExchange()
+        peripheral.scanForExchange(with: mainView.secretPasswordTextField.text!)
+        central.scanForExchange(with: mainView.secretPasswordTextField.text!)
     }
     
     @objc private func onResetButtonTapped() {
@@ -62,12 +59,14 @@ extension BLEViewController: BLECentralDelegate {
         mainView.exchangeMessageResponseLabel.text = message
     }
     
-    func peripheralIsValid() {
-        peripheral.onConnectionSafe()
+    func didFindPeripheral() {
+        viewModel.peripheralAuthenticated.onNext(true)
     }
 }
 
 extension BLEViewController: BLEPeripheralDelegate {
-    
+    func didAuthenticateCentral() {
+        viewModel.receivedAuthentication.onNext(true)
+    }
 }
 
