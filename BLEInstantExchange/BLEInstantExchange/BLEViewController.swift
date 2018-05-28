@@ -65,6 +65,10 @@ extension BLEViewController: BLECentralDelegate {
 }
 
 extension BLEViewController: BLEPeripheralDelegate {
+    func externelDataServiceRevealed() {
+        viewModel.externalDataServiceRevealed.onNext(true)
+    }
+    
     func didAuthenticateCentral() {
         viewModel.receivedAuthentication.onNext(true)
     }

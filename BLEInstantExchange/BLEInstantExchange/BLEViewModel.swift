@@ -11,11 +11,19 @@ class BLEViewModel {
     let delegate: BLEViewModelDelegate
     let peripheralAuthenticated = BehaviorSubject<Bool>(value: false)
     let receivedAuthentication = BehaviorSubject<Bool>(value: false)
+    let dataServiceRevealed = BehaviorSubject<Bool>(value: false)
+    let externalDataServiceRevealed = BehaviorSubject<Bool>(value: false)
     
     init(viewModelDelegate: BLEViewModelDelegate) {
         delegate = viewModelDelegate
         
         Observable.combineLatest(peripheralAuthenticated, receivedAuthentication)
+            .filter { $0.0 && $0.1 }
+            .subscribe( onNext: { _ in
+                
+            }).disposed(by: bag)
+        
+        Observable.combineLatest(dataServiceRevealed, externalDataServiceRevealed)
             .filter { $0.0 && $0.1 }
             .subscribe( onNext: { _ in
                 

@@ -56,6 +56,10 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         connectedPeripheral?.delegate = self
         connectedPeripheral?.discoverServices([Constants.authenticationResultServiceUUID])
     }
+    
+    func revealDataService() {
+        
+    }
 }
 
 extension BLECentralManager: CBPeripheralDelegate {

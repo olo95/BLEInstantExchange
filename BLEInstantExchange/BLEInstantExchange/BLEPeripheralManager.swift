@@ -4,6 +4,7 @@ import RxSwift
 
 protocol BLEPeripheralDelegate {
     func didAuthenticateCentral()
+    func externelDataServiceRevealed()
 }
 
 class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
@@ -64,6 +65,10 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
                 let value = data.hexEncodedString()
                 if value == "31" {
                     peripheralDelegate.didAuthenticateCentral()
+                    peripheralManager?.respond(to: requests[0], withResult: .success)
+                }
+                if value == "32" {
+                    peripheralDelegate.externelDataServiceRevealed()
                     peripheralManager?.respond(to: requests[0], withResult: .success)
                 }
             }
