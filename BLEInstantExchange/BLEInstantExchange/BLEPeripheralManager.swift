@@ -18,8 +18,8 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     private let peripheralDelegate: BLEPeripheralDelegate
     private lazy var dataService = CBMutableService(type: Constants.dataServiceUUID, primary: true)
     private lazy var dataCharacteristic = CBMutableCharacteristic(type: Constants.dataCharacteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)
-//    private lazy var authenticationService = CBMutableService(type: Constants.authenticationResultServiceUUID, primary: true)
-//    private lazy var authenticationCharacteristic = CBMutableCharacteristic(type: Constants.authenticationRestultCharacteristicUUID, properties: writeProperties, value: nil, permissions: writePermissions)
+    private lazy var authenticationService = CBMutableService(type: Constants.authenticationResultServiceUUID, primary: true)
+    private lazy var authenticationCharacteristic = CBMutableCharacteristic(type: Constants.authenticationResultCharacteristicUUID, properties: writeProperties, value: nil, permissions: writePermissions)
     
     private var peripheralManager: CBPeripheralManager?
     private var secretName: String?
@@ -50,6 +50,8 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     private func startAdvertising() {
         guard let secretName = secretName else { return }
         peripheralManager?.removeAllServices()
+        authenticationService.characteristics = [authenticationCharacteristic]
+        peripheralManager?.add(authenticationService)
         peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: secretName, CBAdvertisementDataServiceUUIDsKey: [Constants.authenticationResultServiceUUID]])
     }
     
@@ -59,7 +61,7 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         for request in requests {
-            if request.characteristic.uuid == Constants.authenticationRestultCharacteristicUUID {
+            if request.characteristic.uuid == Constants.authenticationResultCharacteristicUUID {
                 guard let value = request.value?.hexEncodedString() else {
                     return
                 }

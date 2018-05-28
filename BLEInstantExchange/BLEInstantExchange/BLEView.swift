@@ -14,6 +14,7 @@ class BLEView: UIView {
     lazy var exchangeMessageTextField: UITextField = {
         let textField = UITextField()
         textField.backgroundColor = .lightGray
+        textField.text = "Do zmiany"
         return textField
     }()
     
@@ -43,6 +44,7 @@ class BLEView: UIView {
     
     lazy var secretPasswordTextField: UITextField = {
         let textField = UITextField()
+        textField.text = "Secret"
         textField.backgroundColor = .lightGray
         return textField
     }()

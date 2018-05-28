@@ -70,13 +70,14 @@ extension BLECentralManager: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard error == nil else { return }
         let serviceUUID = communicationStatus == .authenticating ? Constants.authenticationResultServiceUUID : Constants.dataServiceUUID
+        let characteristicUUID = communicationStatus == .authenticating ? Constants.authenticationResultCharacteristicUUID : Constants.dataCharacteristicUUID
         guard let service = peripheral.services?.first(where: { $0.uuid == serviceUUID }) else { return }
-        connectedPeripheral?.discoverCharacteristics([serviceUUID], for: service)
+        connectedPeripheral?.discoverCharacteristics([characteristicUUID], for: service)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         guard error == nil else { return }
-        let characteristicUUID = communicationStatus == .authenticating ? Constants.authenticationRestultCharacteristicUUID : Constants.dataCharacteristicUUID
+        let characteristicUUID = communicationStatus == .authenticating ? Constants.authenticationResultCharacteristicUUID : Constants.dataCharacteristicUUID
         guard let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else { return }
         authorizationCharacteristic = characteristic
         communicationStatus == .authenticating ? connectedPeripheral?.writeValue("1".data(using: .utf8)!, for: characteristic, type: .withResponse) : connectedPeripheral?.readValue(for: characteristic)
