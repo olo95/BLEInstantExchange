@@ -2,7 +2,8 @@
 import RxSwift
 
 protocol BLEViewModelDelegate {
-    
+    func devicesAuthorized()
+    func dataTransmittingEnabled()
 }
 
 class BLEViewModel {
@@ -19,14 +20,14 @@ class BLEViewModel {
         
         Observable.combineLatest(peripheralAuthenticated, receivedAuthentication)
             .filter { $0.0 && $0.1 }
-            .subscribe( onNext: { _ in
-                
+            .subscribe( onNext: { [weak self] _ in
+                self?.delegate.devicesAuthorized()
             }).disposed(by: bag)
         
         Observable.combineLatest(dataServiceRevealed, externalDataServiceRevealed)
             .filter { $0.0 && $0.1 }
-            .subscribe( onNext: { _ in
-                
+            .subscribe( onNext: { [weak self] _ in
+                self?.delegate.dataTransmittingEnabled()
             }).disposed(by: bag)
     }
 }

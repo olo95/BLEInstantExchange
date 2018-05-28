@@ -13,6 +13,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     private var centralManager: CBCentralManager?
     private var connectedPeripheral: CBPeripheral?
+    private var authorizationCharacteristic: CBCharacteristic?
     
     private var isPeripheralValid: Bool = false
     private var secretName: String?
@@ -57,8 +58,11 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         connectedPeripheral?.discoverServices([Constants.authenticationResultServiceUUID])
     }
     
-    func revealDataService() {
-        
+    func indicateDataServiceAdded() {
+        guard let authorizationCharacteristic = self.authorizationCharacteristic else {
+            return
+        }
+        connectedPeripheral?.writeValue("2".data(using: .utf8)!, for: authorizationCharacteristic, type: .withResponse)
     }
 }
 
@@ -74,6 +78,7 @@ extension BLECentralManager: CBPeripheralDelegate {
         guard error == nil else { return }
         let characteristicUUID = communicationStatus == .authenticating ? Constants.authenticationRestultCharacteristicUUID : Constants.dataCharacteristicUUID
         guard let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else { return }
+        authorizationCharacteristic = characteristic
         communicationStatus == .authenticating ? connectedPeripheral?.writeValue("1".data(using: .utf8)!, for: characteristic, type: .withResponse) : connectedPeripheral?.readValue(for: characteristic)
     }
     

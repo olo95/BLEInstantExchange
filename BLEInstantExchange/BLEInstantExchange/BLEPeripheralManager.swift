@@ -4,7 +4,8 @@ import RxSwift
 
 protocol BLEPeripheralDelegate {
     func didAuthenticateCentral()
-    func externelDataServiceRevealed()
+    func externalDataServiceRevealed()
+    func didAddDataService()
 }
 
 class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
@@ -17,8 +18,8 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     private let peripheralDelegate: BLEPeripheralDelegate
     private lazy var dataService = CBMutableService(type: Constants.dataServiceUUID, primary: true)
     private lazy var dataCharacteristic = CBMutableCharacteristic(type: Constants.dataCharacteristicUUID, properties: readProperties, value: nil, permissions: readPermissions)
-    private lazy var authenticationService = CBMutableService(type: Constants.authenticationResultServiceUUID, primary: true)
-    private lazy var authenticationCharacteristic = CBMutableCharacteristic(type: Constants.authenticationRestultCharacteristicUUID, properties: writeProperties, value: nil, permissions: writePermissions)
+//    private lazy var authenticationService = CBMutableService(type: Constants.authenticationResultServiceUUID, primary: true)
+//    private lazy var authenticationCharacteristic = CBMutableCharacteristic(type: Constants.authenticationRestultCharacteristicUUID, properties: writeProperties, value: nil, permissions: writePermissions)
     
     private var peripheralManager: CBPeripheralManager?
     private var secretName: String?
@@ -59,19 +60,24 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         for request in requests {
             if request.characteristic.uuid == Constants.authenticationRestultCharacteristicUUID {
-                guard let data = request.value else {
+                guard let value = request.value?.hexEncodedString() else {
                     return
                 }
-                let value = data.hexEncodedString()
                 if value == "31" {
                     peripheralDelegate.didAuthenticateCentral()
                     peripheralManager?.respond(to: requests[0], withResult: .success)
                 }
                 if value == "32" {
-                    peripheralDelegate.externelDataServiceRevealed()
+                    peripheralDelegate.externalDataServiceRevealed()
                     peripheralManager?.respond(to: requests[0], withResult: .success)
                 }
             }
         }
+    }
+    
+    func addDataService() {
+        dataService.characteristics = [dataCharacteristic]
+        peripheralManager?.add(dataService)
+        peripheralDelegate.didAddDataService()
     }
 }

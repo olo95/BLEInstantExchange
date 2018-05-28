@@ -51,6 +51,14 @@ class BLEViewController: UIViewController {
 }
 
 extension BLEViewController: BLEViewModelDelegate {
+    func dataTransmittingEnabled() {
+        
+    }
+    
+    func devicesAuthorized() {
+        peripheral.addDataService()
+    }
+    
     
 }
 
@@ -65,7 +73,12 @@ extension BLEViewController: BLECentralDelegate {
 }
 
 extension BLEViewController: BLEPeripheralDelegate {
-    func externelDataServiceRevealed() {
+    func didAddDataService() {
+        viewModel.dataServiceRevealed.onNext(true)
+        central.indicateDataServiceAdded()
+    }
+    
+    func externalDataServiceRevealed() {
         viewModel.externalDataServiceRevealed.onNext(true)
     }
     
