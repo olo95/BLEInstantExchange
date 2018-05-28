@@ -25,16 +25,20 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     private var secretName: String?
     private var exchangeMessage: String?
     private var communicationStatus: BLECommunicationStatus = .authenticating
+    private var isDataServiceAdded = false
     
     init(peripheralDelegate: BLEPeripheralDelegate) {
         self.peripheralDelegate = peripheralDelegate
         super.init()
+        peripheralManager?.removeAllServices()
+        peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
     
     func scanForExchange(with secretName: String, exchangeMessage: String) {
         self.secretName = secretName
         self.exchangeMessage = exchangeMessage
         communicationStatus = .authenticating
+        isDataServiceAdded = false
         peripheralManager?.removeAllServices()
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
@@ -56,7 +60,8 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
         peripheralManager?.removeAllServices()
         authenticationService.characteristics = [authenticationCharacteristic]
         peripheralManager?.add(authenticationService)
-        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: secretName, CBAdvertisementDataServiceUUIDsKey: [Constants.authenticationResultServiceUUID]])
+//        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: secretName, CBAdvertisementDataServiceUUIDsKey: [Constants.authenticationResultServiceUUID]])
+        peripheralManager?.startAdvertising([CBAdvertisementDataLocalNameKey: secretName])
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
@@ -87,8 +92,11 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     func addDataService() {
-        dataService.characteristics = [dataCharacteristic]
-        peripheralManager?.add(dataService)
+        if !isDataServiceAdded {
+            dataService.characteristics = [dataCharacteristic]
+            peripheralManager?.add(dataService)
+            isDataServiceAdded = true
+        }
         peripheralDelegate.didAddDataService()
     }
     

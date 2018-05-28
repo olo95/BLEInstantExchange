@@ -44,7 +44,7 @@ class BLEView: UIView {
     
     lazy var secretPasswordTextField: UITextField = {
         let textField = UITextField()
-        textField.text = "Secret"
+        textField.text = "SecretSecretSecretSecret"
         textField.backgroundColor = .lightGray
         return textField
     }()

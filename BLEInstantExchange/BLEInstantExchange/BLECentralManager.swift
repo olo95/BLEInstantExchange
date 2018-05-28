@@ -21,11 +21,14 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     init(centralDelegate: BLECentralDelegate) {
         self.centralDelegate = centralDelegate
+        super.init()
+        centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
-            centralManager?.scanForPeripherals(withServices: [Constants.authenticationResultServiceUUID], options: nil)
+//            centralManager?.scanForPeripherals(withServices: [Constants.authenticationResultServiceUUID], options: nil)
+            centralManager?.scanForPeripherals(withServices: nil, options: nil)
         } else if central.state == .poweredOff {
             centralManager?.stopScan()
         }
@@ -35,7 +38,6 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         connectedPeripheral = nil
         self.secretName = secretName
         communicationStatus = .authenticating
-        connectedPeripheral = nil
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
@@ -50,14 +52,20 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         }
         if let connectedPeripheral = connectedPeripheral { centralManager?.cancelPeripheralConnection(connectedPeripheral) }
         connectedPeripheral = peripheral
+        guard let connectedPeripheral = connectedPeripheral else { return }
         central.stopScan()
-        central.connect(connectedPeripheral!, options: nil)
-        centralDelegate.didFindPeripheral()
+        central.connect(connectedPeripheral, options: nil)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        centralDelegate.didFindPeripheral()
         connectedPeripheral?.delegate = self
-        connectedPeripheral?.discoverServices([Constants.authenticationResultServiceUUID])
+//        connectedPeripheral?.discoverServices([Constants.authenticationResultServiceUUID])
+        connectedPeripheral?.discoverServices(nil)
+    }
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        print("Siema")
     }
     
     func indicateDataServiceAdded() {
