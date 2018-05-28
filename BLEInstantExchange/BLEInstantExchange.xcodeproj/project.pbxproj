@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		6054636B20B7EEE10063CE8D /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6054636A20B7EEE10063CE8D /* Constants.swift */; };
-		6054636D20B8447B0063CE8D /* Data+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6054636C20B8447B0063CE8D /* Data+Extension.swift */; };
 		6054636F20B844FF0063CE8D /* BLECommunicationStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6054636E20B844FF0063CE8D /* BLECommunicationStatus.swift */; };
 		6078BFCF20B54B8A0027D20C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6078BFCE20B54B8A0027D20C /* AppDelegate.swift */; };
 		6078BFD120B54B8A0027D20C /* BLEViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6078BFD020B54B8A0027D20C /* BLEViewController.swift */; };
@@ -24,7 +23,6 @@
 /* Begin PBXFileReference section */
 		010F938D45C7225740176FB8 /* Pods-BLEInstantExchange.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BLEInstantExchange.debug.xcconfig"; path = "Pods/Target Support Files/Pods-BLEInstantExchange/Pods-BLEInstantExchange.debug.xcconfig"; sourceTree = "<group>"; };
 		6054636A20B7EEE10063CE8D /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
-		6054636C20B8447B0063CE8D /* Data+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Extension.swift"; sourceTree = "<group>"; };
 		6054636E20B844FF0063CE8D /* BLECommunicationStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLECommunicationStatus.swift; sourceTree = "<group>"; };
 		6078BFCB20B54B8A0027D20C /* BLEInstantExchange.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BLEInstantExchange.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6078BFCE20B54B8A0027D20C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -79,12 +77,11 @@
 				6078BFE420B551140027D20C /* BLEViewModel.swift */,
 				6078BFE620B557FF0027D20C /* BLECentralManager.swift */,
 				6078BFE820B558100027D20C /* BLEPeripheralManager.swift */,
+				6054636E20B844FF0063CE8D /* BLECommunicationStatus.swift */,
 				6054636A20B7EEE10063CE8D /* Constants.swift */,
 				6078BFD520B54B8C0027D20C /* Assets.xcassets */,
 				6078BFD720B54B8C0027D20C /* LaunchScreen.storyboard */,
 				6078BFDA20B54B8C0027D20C /* Info.plist */,
-				6054636C20B8447B0063CE8D /* Data+Extension.swift */,
-				6054636E20B844FF0063CE8D /* BLECommunicationStatus.swift */,
 			);
 			path = BLEInstantExchange;
 			sourceTree = "<group>";
@@ -226,7 +223,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				6078BFD120B54B8A0027D20C /* BLEViewController.swift in Sources */,
-				6054636D20B8447B0063CE8D /* Data+Extension.swift in Sources */,
 				6054636F20B844FF0063CE8D /* BLECommunicationStatus.swift in Sources */,
 				6078BFE320B550480027D20C /* BLEView.swift in Sources */,
 				6078BFE920B558100027D20C /* BLEPeripheralManager.swift in Sources */,

@@ -91,9 +91,9 @@ extension BLECentralManager: CBPeripheralDelegate {
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        guard error == nil, characteristic.uuid == Constants.dataCharacteristicUUID, let value = characteristic.value?.hexEncodedString() else {
+        guard error == nil, characteristic.uuid == Constants.dataCharacteristicUUID, let messageData = characteristic.value, let message = String(data: messageData, encoding: .utf8) else {
             return
         }
-        centralDelegate.onReceived(message: value)
+        centralDelegate.onReceived(message: message)
     }
 }

@@ -35,6 +35,7 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
         self.secretName = secretName
         self.exchangeMessage = exchangeMessage
         communicationStatus = .authenticating
+        peripheralManager?.removeAllServices()
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
     
@@ -70,14 +71,14 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
         for request in requests {
             if request.characteristic.uuid == Constants.authenticationResultCharacteristicUUID {
-                guard let value = request.value?.hexEncodedString() else {
+                guard let value = request.value, let message = String(data: value, encoding: .utf8) else {
                     return
                 }
-                if value == "31" {
+                if message.elementsEqual("1") {
                     peripheralDelegate.didAuthenticateCentral()
                     peripheralManager?.respond(to: requests[0], withResult: .success)
                 }
-                if value == "32" {
+                if message.elementsEqual("2") {
                     peripheralDelegate.externalDataServiceRevealed()
                     peripheralManager?.respond(to: requests[0], withResult: .success)
                 }
