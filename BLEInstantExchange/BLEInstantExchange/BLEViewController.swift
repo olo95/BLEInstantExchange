@@ -38,9 +38,13 @@ class BLEViewController: UIViewController {
         guard !(mainView.exchangeMessageTextField.text!.isEmpty) && !(mainView.secretPasswordTextField.text!.isEmpty) else {
             return
         }
+        viewModel.dataServiceRevealed.onNext(false)
+        viewModel.externalDataServiceRevealed.onNext(false)
+        viewModel.peripheralAuthenticated.onNext(false)
+        viewModel.receivedAuthentication.onNext(false)
         central.stop()
         peripheral.stop()
-        peripheral.scanForExchange(with: mainView.secretPasswordTextField.text!)
+        peripheral.scanForExchange(with: mainView.secretPasswordTextField.text!, exchangeMessage: mainView.exchangeMessageTextField.text!)
         central.scanForExchange(with: mainView.secretPasswordTextField.text!)
     }
     
@@ -52,14 +56,13 @@ class BLEViewController: UIViewController {
 
 extension BLEViewController: BLEViewModelDelegate {
     func dataTransmittingEnabled() {
-        
+        peripheral.prepareForDataRead()
+        central.readData()
     }
     
     func devicesAuthorized() {
         peripheral.addDataService()
     }
-    
-    
 }
 
 extension BLEViewController: BLECentralDelegate {

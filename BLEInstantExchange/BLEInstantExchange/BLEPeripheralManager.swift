@@ -23,6 +23,7 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     
     private var peripheralManager: CBPeripheralManager?
     private var secretName: String?
+    private var exchangeMessage: String?
     private var communicationStatus: BLECommunicationStatus = .authenticating
     
     init(peripheralDelegate: BLEPeripheralDelegate) {
@@ -30,8 +31,10 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
         super.init()
     }
     
-    func scanForExchange(with secretName: String) {
+    func scanForExchange(with secretName: String, exchangeMessage: String) {
         self.secretName = secretName
+        self.exchangeMessage = exchangeMessage
+        communicationStatus = .authenticating
         peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
     }
     
@@ -56,7 +59,12 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
-        
+        guard let message = exchangeMessage, request.characteristic.uuid == Constants.dataCharacteristicUUID else {
+            peripheralManager?.respond(to: request, withResult: .unlikelyError)
+            return
+        }
+        request.value = message.data(using: .utf8)
+        peripheralManager?.respond(to: request, withResult: .success)
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
@@ -81,5 +89,9 @@ class BLEPeripheralManager: NSObject, CBPeripheralManagerDelegate {
         dataService.characteristics = [dataCharacteristic]
         peripheralManager?.add(dataService)
         peripheralDelegate.didAddDataService()
+    }
+    
+    func prepareForDataRead() {
+        communicationStatus = .transmitting
     }
 }

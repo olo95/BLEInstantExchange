@@ -34,6 +34,8 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     func scanForExchange(with secretName: String?) {
         connectedPeripheral = nil
         self.secretName = secretName
+        communicationStatus = .authenticating
+        connectedPeripheral = nil
         centralManager = CBCentralManager(delegate: self, queue: nil)
     }
     
@@ -64,6 +66,11 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
         }
         connectedPeripheral?.writeValue("2".data(using: .utf8)!, for: authorizationCharacteristic, type: .withResponse)
     }
+    
+    func readData() {
+        communicationStatus = .transmitting
+        connectedPeripheral?.discoverServices([Constants.dataServiceUUID])
+    }
 }
 
 extension BLECentralManager: CBPeripheralDelegate {
@@ -79,11 +86,14 @@ extension BLECentralManager: CBPeripheralDelegate {
         guard error == nil else { return }
         let characteristicUUID = communicationStatus == .authenticating ? Constants.authenticationResultCharacteristicUUID : Constants.dataCharacteristicUUID
         guard let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else { return }
-        authorizationCharacteristic = characteristic
+        if characteristicUUID == Constants.authenticationResultCharacteristicUUID { authorizationCharacteristic = characteristic }
         communicationStatus == .authenticating ? connectedPeripheral?.writeValue("1".data(using: .utf8)!, for: characteristic, type: .withResponse) : connectedPeripheral?.readValue(for: characteristic)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        
+        guard error == nil, characteristic.uuid == Constants.dataCharacteristicUUID, let value = characteristic.value?.hexEncodedString() else {
+            return
+        }
+        centralDelegate.onReceived(message: value)
     }
 }
