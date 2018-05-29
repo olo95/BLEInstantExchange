@@ -42,6 +42,7 @@ class BLEViewController: UIViewController {
         viewModel.externalDataServiceRevealed.onNext(false)
         viewModel.peripheralAuthenticated.onNext(false)
         viewModel.receivedAuthentication.onNext(false)
+        viewModel.externalAuthorizationCharacteristicObtained.onNext(false)
         central.stop()
         peripheral.stop()
         peripheral.scanForExchange(with: mainView.secretPasswordTextField.text!, exchangeMessage: mainView.exchangeMessageTextField.text!)
@@ -66,6 +67,10 @@ extension BLEViewController: BLEViewModelDelegate {
 }
 
 extension BLEViewController: BLECentralDelegate {
+    func externalAuthorizationCharacteristicObtained() {
+        viewModel.externalAuthorizationCharacteristicObtained.onNext(true)
+    }
+    
     func onReceived(message: String) {
         mainView.exchangeMessageResponseLabel.text = message
     }

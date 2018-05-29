@@ -5,6 +5,7 @@ import RxSwift
 protocol BLECentralDelegate {
     func onReceived(message: String)
     func didFindPeripheral()
+    func externalAuthorizationCharacteristicObtained()
 }
 
 class BLECentralManager: NSObject, CBCentralManagerDelegate {
@@ -27,7 +28,6 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         if central.state == .poweredOn {
-//            centralManager?.scanForPeripherals(withServices: [Constants.authenticationResultServiceUUID], options: nil)
             centralManager?.scanForPeripherals(withServices: nil, options: nil)
         } else if central.state == .poweredOff {
             centralManager?.stopScan()
@@ -60,12 +60,7 @@ class BLECentralManager: NSObject, CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         centralDelegate.didFindPeripheral()
         connectedPeripheral?.delegate = self
-//        connectedPeripheral?.discoverServices([Constants.authenticationResultServiceUUID])
         connectedPeripheral?.discoverServices(nil)
-    }
-    
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        print("Siema")
     }
     
     func indicateDataServiceAdded() {
@@ -94,8 +89,11 @@ extension BLECentralManager: CBPeripheralDelegate {
         guard error == nil else { return }
         let characteristicUUID = communicationStatus == .authenticating ? Constants.authenticationResultCharacteristicUUID : Constants.dataCharacteristicUUID
         guard let characteristic = service.characteristics?.first(where: { $0.uuid == characteristicUUID }) else { return }
-        if characteristicUUID == Constants.authenticationResultCharacteristicUUID { authorizationCharacteristic = characteristic }
-        communicationStatus == .authenticating ? connectedPeripheral?.writeValue("1".data(using: .utf8)!, for: characteristic, type: .withResponse) : connectedPeripheral?.readValue(for: characteristic)
+        if characteristicUUID == Constants.authenticationResultCharacteristicUUID {
+            authorizationCharacteristic = characteristic
+            centralDelegate.externalAuthorizationCharacteristicObtained()
+        }
+        communicationStatus == .authenticating ? connectedPeripheral?.writeValue("1".data(using: .utf8)!, for: authorizationCharacteristic!, type: .withResponse) : connectedPeripheral?.readValue(for: characteristic)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
